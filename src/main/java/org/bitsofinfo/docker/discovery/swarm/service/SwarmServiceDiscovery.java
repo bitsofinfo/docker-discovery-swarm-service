@@ -25,9 +25,12 @@ import com.spotify.docker.client.messages.swarm.Service.Criteria;
 import com.spotify.docker.client.messages.swarm.Task;
 
 /**
- * SwarmServiceDiscovery
+ * Use SwarmServiceDiscovery for finding about your docker swarm service
+ * assigned ip as well of those of peer containers in the same service
  * 
- * 
+ * It assumes that each container you launch that uses this library
+ * has an ENVIRONMENT variable "DOCKER_HOST" that is set equal to 
+ * a swarm manager node.
  * 
  * @author bitsofinfo
  *
@@ -47,6 +50,14 @@ public class SwarmServiceDiscovery {
 	private DiscoveredContainer myContainer = null;
 	private InetAddress myAddress = null;
 
+	/**
+	 * Constructor
+	 * 
+	 * @param rawDockerNetworkNames comma delimited list of names
+	 * @param rawDockerServiceLabels comma delimited list of names
+	 * @param rawDockerServiceNames (optional) comma delimited list of names
+	 * @throws Exception
+	 */
 	public SwarmServiceDiscovery(String rawDockerNetworkNames, 
 						         String rawDockerServiceLabels,
 							     String rawDockerServiceNames) throws Exception {
@@ -308,11 +319,49 @@ public class SwarmServiceDiscovery {
 	}
 
 	public InetAddress getMyIpAddress() {
+		if (myAddress == null) {
+			try {
+				this.discoverSelf();
+			} catch(Exception e) {
+				logger.error("Unexpected error in getMyIpAddress(): " + e.getMessage(),e);
+			}
+		}
 		return myAddress;
 	}
 
 	public DiscoveredContainer getMyContainer() {
+		if (myContainer == null) {
+			try {
+				this.discoverSelf();
+			} catch(Exception e) {
+				logger.error("Unexpected error in getMyContainer(): " + e.getMessage(),e);
+			}
+		}
 		return myContainer;
+	}
+	
+	public SwarmServiceDiscovery addDockerNetworkName(String name) {
+		if (this.dockerNetworkNames == null) {
+			this.dockerNetworkNames = new HashSet<String>();
+		}
+		this.dockerNetworkNames.add(name);
+		return this;
+	}
+	
+	public SwarmServiceDiscovery addDockerServiceName(String name) {
+		if (this.dockerServiceNames == null) {
+			this.dockerServiceNames = new HashSet<String>();
+		}
+		this.dockerServiceNames.add(name);
+		return this;
+	}
+	
+	public SwarmServiceDiscovery addDockerServiceLabel(String label, String value) {
+		if (this.dockerServiceLabels == null) {
+			this.dockerServiceLabels = new HashMap<String,String>();
+		}
+		this.dockerServiceLabels.put(label,value);
+		return this;
 	}
 }
 

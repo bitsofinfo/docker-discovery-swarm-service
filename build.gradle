@@ -80,8 +80,7 @@ task sourcesJar(type: Jar, dependsOn: classes) {
 }
 
 task runTests(type: Test) {
-	description 'Runs unit tests for all tests except TestDoNothingRegistrator.'
-  	
+
   	//Always run tests even when up-to-date 
   	outputs.upToDateWhen { 
   		false 
