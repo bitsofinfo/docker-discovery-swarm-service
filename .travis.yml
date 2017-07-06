@@ -1,0 +1,76 @@
+sudo: required
+language: java
+
+addons:
+  apt:
+    packages:
+      - net-tools
+
+services:
+  - docker
+
+before_cache:
+  - rm -f  $HOME/.gradle/caches/modules-2/modules-2.lock
+  - rm -fr $HOME/.gradle/caches/*/plugin-resolution/
+
+cache:
+  directories:
+    - $HOME/.gradle/caches/
+    - $HOME/.gradle/wrapper/
+before_script:
+
+script:
+
+  # Build FAT jar and Docker container for the test
+  # and start socat to map docker socket to 2376 tcp port
+  - ./gradlew --refresh-dependencies shadowJar
+  - docker run -d -v /var/run/docker.sock:/var/run/docker.sock -p 2376:2375 bobrik/socat TCP4-LISTEN:2375,fork,reuseaddr UNIX-CONNECT:/var/run/docker.sock
+  - docker build -t docker-discovery-swarm-service-test -f Test.Dockerfile .
+  - docker images
+
+  # Init swarm and network
+  - docker swarm init
+  - docker node ls
+  - docker network create -d overlay docker-discovery-swarm-service-test
+
+  # Capture the VM's IP
+  - export MY_IP=`ifconfig eth0 | grep "inet addr" | cut -d ':' -f 2 | cut -d ' ' -f 1`
+  - echo $MY_IP
+
+  # Create the service
+  - docker service create --network docker-discovery-swarm-service-test --name docker-discovery-swarm-service-test -e "DOCKER_HOST=http://$MY_IP:2376" docker-discovery-swarm-service-test java -DdockerNetworkNames=docker-discovery-swarm-service-test -DdockerServiceNames=docker-discovery-swarm-service-test -jar /test.jar
+  - docker service ls
+  - sleep 10
+
+  # Dump logs of first container and scale to 10
+  - docker ps
+  - export CONTAINER1_ID=`docker ps -f "name=docker-discovery-swarm-service-test.1" --format "{{.ID}}"`
+  - docker logs $CONTAINER1_ID
+  - docker service scale docker-discovery-swarm-service-test=10
+
+  # Let cluster form w/ 10 nodes and verify there are 10 hz members
+  - sleep 60
+  - docker ps
+  - docker logs $CONTAINER1_ID
+  - export CONTAINER10_ID=`docker ps -f "name=docker-discovery-swarm-service-test.10" --format "{{.ID}}"`
+  - docker logs $CONTAINER10_ID
+  - export MEMBER_TOTAL=`docker logs --tail 50 $CONTAINER1_ID 2>&1 | grep "total nodes \[10\]"`
+  - echo $MEMBER_TOTAL
+  - if [ "$MEMBER_TOTAL" = 'total nodes [10] {' ]; then echo "OK"; else exit 1; fi
+
+  # Scale cluster down to 2 nodes, wait 2 minutes then verify only 2 nodes
+  - docker service scale docker-discovery-swarm-service-test=2
+  - sleep 120
+  - docker ps
+  - export CONTAINERX_ID=`docker ps -f "name=docker-discovery-swarm-service-test." --format "{{.ID}}"`
+  - CONTAINERX_ID=`echo $CONTAINERX_ID | awk '{ print $1 }'`
+  - docker logs --tail 50 $CONTAINERX_ID
+  - export MEMBER_TOTAL=`docker logs --tail 50 $CONTAINERX_ID 2>&1 | grep "total nodes \[2\]"`
+  - echo $MEMBER_TOTAL
+  - if [ "$MEMBER_TOTAL" = 'total nodes [2] {' ]; then echo "OK"; else exit 1; fi
+
+  # Remove the service
+  - docker service rm docker-discovery-swarm-service-test
+
+jdk:
+  - oraclejdk8

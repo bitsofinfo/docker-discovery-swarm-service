@@ -1,0 +1,120 @@
+buildscript {
+	repositories {
+    	jcenter()
+    }
+    
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:2.0.1'
+    }
+}
+
+plugins {
+    id "com.jfrog.bintray" version "1.7.3"
+}
+
+group = 'org.bitsofinfo'
+
+allprojects {
+	repositories {
+		jcenter()
+	}
+	apply plugin: 'maven'
+	apply plugin: 'maven-publish'
+	apply plugin: 'application'
+	apply plugin: 'com.github.johnrengelman.shadow'
+	apply plugin: 'java'
+	
+    mainClassName = 'org.bitsofinfo.docker.discovery.swarm.service.test.DockerTestRunner'
+}
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+dependencies {
+    
+    // https://mvnrepository.com/artifact/com.spotify/docker-client
+    compile group: 'com.spotify', name: 'docker-client', version: '8.7.3'
+    
+    compile 'org.slf4j:slf4j-api:1.7.19'
+    
+    testCompile  group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
+    testCompile  group: 'log4j', name: 'log4j', version: '1.2.17'
+    
+}
+
+bintray {
+	user = project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('bintrayUser')
+	key = project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('bintrayApiKey')
+    publications = ['dockerDiscoverySwarmService']
+    pkg {
+        repo = 'maven'
+        name = 'docker-discovery-swarm-service'
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/bitsofinfo/docker-discovery-swarm-service'
+        publicDownloadNumbers = true
+        version {
+		    name = project.property('version')
+		    desc = project.property('version') + " : " + project.property('description')
+		    released  = new Date()
+		    vcsTag = project.property('version')
+		}
+    }
+}
+
+publishing {
+    publications {
+        dockerDiscoverySwarmService(MavenPublication) {
+            from components.java
+            groupId project.property('group')
+            artifactId 'docker-discovery-swarm-service'
+            version project.property('version')
+
+            artifact sourcesJar
+        }
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task runTests(type: Test) {
+	description 'Runs unit tests for all tests except TestDoNothingRegistrator.'
+  	
+  	//Always run tests even when up-to-date 
+  	outputs.upToDateWhen { 
+  		false 
+  	}
+	
+}
+
+task unitTest(type: Test) {
+	description 'Runs unit tests for single class.'
+  	
+  	//Always run tests even when up-to-date 
+  	outputs.upToDateWhen { 
+  		false 
+  	}
+  	
+}
+
+runTests {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events 'started', 'passed'
+    }
+}
+
+unitTest {
+    testLogging {
+        // Show that tests are run in the command-line output
+        events 'started', 'passed'
+    }
+}
+
+artifacts {
+    archives sourcesJar
+}
+
+
