@@ -36,7 +36,7 @@ public class DockerTestRunner {
 			logger.info("MyAddress: " + ssd.getMyIpAddress().getHostAddress() + " total nodes: ["+ssd.discoverContainers().size()+"]");
 			logger.info(sb.toString());
 			
-			Thread.currentThread().sleep(2000);
+			Thread.currentThread().sleep(3000);
 		}
 		
 		System.exit(0);
