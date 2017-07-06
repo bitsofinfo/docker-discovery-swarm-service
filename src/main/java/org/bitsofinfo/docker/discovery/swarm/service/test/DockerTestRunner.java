@@ -36,7 +36,7 @@ public class DockerTestRunner {
 			}
 			logger.info(sb.toString());
 			
-			Thread.currentThread().sleep(1000);
+			Thread.currentThread().sleep(2000);
 		}
 		
 		System.exit(0);
