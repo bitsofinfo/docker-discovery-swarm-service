@@ -197,9 +197,9 @@ public class SwarmServiceDiscovery {
 			final DockerClient docker = DefaultDockerClient.fromEnv().build();
 			
 			StringBuffer sb = new StringBuffer("discoverNodes(): via DOCKER_HOST: " + docker.getHost() + "\n");
-			sb.append("docker-network-names = " + this.getRawDockerNetworkNames() + "\n");
-			sb.append("docker-service-names = " + this.getRawDockerServiceNames() + "\n");
-			sb.append("docker-service-labels = " + this.getRawDockerServiceLabels() + "\n");
+			sb.append("dockerNetworkNames = " + this.getRawDockerNetworkNames() + "\n");
+			sb.append("dockerServiceNames = " + this.getRawDockerServiceNames() + "\n");
+			sb.append("dockerServiceLabels = " + this.getRawDockerServiceLabels() + "\n");
 			logger.info(sb.toString());
 
 			// our discovered containers
