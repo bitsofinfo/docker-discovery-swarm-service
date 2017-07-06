@@ -54,7 +54,7 @@ script:
   - docker logs $CONTAINER1_ID
   - export CONTAINER10_ID=`docker ps -f "name=docker-discovery-swarm-service-test.10" --format "{{.ID}}"`
   - docker logs $CONTAINER10_ID
-  - export MEMBER_TOTAL=`docker logs --tail 50 $CONTAINER1_ID 2>&1 | grep "total nodes\: \[10\]"`
+  - export MEMBER_TOTAL=`docker logs --tail 50 $CONTAINER1_ID 2>&1 | grep 1`
   - echo $MEMBER_TOTAL
   - if [ "$MEMBER_TOTAL" = 'total nodes: [10] {' ]; then echo "OK"; else exit 1; fi
 
