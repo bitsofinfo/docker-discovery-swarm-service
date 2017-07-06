@@ -56,7 +56,7 @@ script:
   - docker logs $CONTAINER10_ID
   - export MEMBER_TOTAL=`docker logs --tail 50 $CONTAINER1_ID 2>&1 | grep "total nodes: \[10\]"`
   - echo $MEMBER_TOTAL
-  - if [ "$MEMBER_TOTAL" = 'total nodes [10] {' ]; then echo "OK"; else exit 1; fi
+  - if [ "$MEMBER_TOTAL" = 'total nodes: [10] {' ]; then echo "OK"; else exit 1; fi
 
   # Scale cluster down to 2 nodes, wait 2 minutes then verify only 2 nodes
   - docker service scale docker-discovery-swarm-service-test=2
@@ -67,7 +67,7 @@ script:
   - docker logs --tail 50 $CONTAINERX_ID
   - export MEMBER_TOTAL=`docker logs --tail 50 $CONTAINERX_ID 2>&1 | grep "total nodes: \[2\]"`
   - echo $MEMBER_TOTAL
-  - if [ "$MEMBER_TOTAL" = 'total nodes [2] {' ]; then echo "OK"; else exit 1; fi
+  - if [ "$MEMBER_TOTAL" = 'total nodes: [2] {' ]; then echo "OK"; else exit 1; fi
 
   # Remove the service
   - docker service rm docker-discovery-swarm-service-test
