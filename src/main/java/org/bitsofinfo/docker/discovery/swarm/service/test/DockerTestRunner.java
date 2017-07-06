@@ -28,12 +28,12 @@ public class DockerTestRunner {
 		
 		for (int i=0; i<300; i++) {
 		
-			logger.info("MyAddress: " + ssd.getMyIpAddress().getHostAddress() + " total nodes: ["+ssd.discoverContainers().size()+"]");
-			
 			StringBuffer sb = new StringBuffer("Discovered Nodes including self:\n");
 			for (DiscoveredContainer dc : ssd.discoverContainers()) {
 				sb.append(dc.getIp()+"\n");
 			}
+			
+			logger.info("MyAddress: " + ssd.getMyIpAddress().getHostAddress() + " total nodes: ["+ssd.discoverContainers().size()+"]");
 			logger.info(sb.toString());
 			
 			Thread.currentThread().sleep(2000);
