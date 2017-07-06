@@ -61,6 +61,7 @@ public class SwarmServiceDiscovery {
 					dockerNetworkNames.add(rawElement.trim());
 				}
 			}
+			
 		} else {
 			String msg = "SwarmDiscoveryUtil() You must specify at least one value for 'rawDockerNetworkNames'";
 			logger.error("SwarmDiscoveryUtil: " + msg);
