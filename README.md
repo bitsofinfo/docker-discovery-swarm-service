@@ -165,8 +165,6 @@ See the [.travis.yml](.travis.yml) file for the full details.
 ## <a id="related"></a>Related info
 
 * https://docs.docker.com/engine/swarm/
-* https://github.com/hazelcast/hazelcast/issues/10801
-* https://github.com/hazelcast/hazelcast/issues/10802
 
 
 
