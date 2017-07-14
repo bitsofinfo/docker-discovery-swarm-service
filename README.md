@@ -29,6 +29,8 @@ Beta code.
 
 * MASTER - in progress, this README refers to what is in the master branch. Switch to relevant RELEASE tag above to see that versions README
 
+* [1.0-RC2](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC2) - excludes stopped tasks
+
 * [1.0-RC1](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC1)
 
 ## <a id="requirements"></a>Requirements
@@ -49,7 +51,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.bitsofinfo:docker-discovery-swarm-service:1.0-RC1'
+    compile 'org.bitsofinfo:docker-discovery-swarm-service:1.0-RC2'
 }
 ```
 
@@ -60,7 +62,7 @@ dependencies {
     <dependency>
         <groupId>org.bitsofinfo</groupId>
         <artifactId>docker-discovery-swarm-service</artifactId>
-        <version>1.0-RC1</version>
+        <version>1.0-RC2</version>
     </dependency>
 </dependencies>
 

@@ -23,6 +23,7 @@ import com.spotify.docker.client.messages.swarm.NetworkAttachment;
 import com.spotify.docker.client.messages.swarm.Service;
 import com.spotify.docker.client.messages.swarm.Service.Criteria;
 import com.spotify.docker.client.messages.swarm.Task;
+import com.spotify.docker.client.messages.swarm.TaskStatus;
 
 /**
  * Use SwarmServiceDiscovery for finding about your docker swarm service
@@ -300,12 +301,13 @@ public class SwarmServiceDiscovery {
 							// that we actually care aboute
 							if (networkAttachment.network().id().equals(vip.networkId())) {
 								
-								logger.info("Found qualifying docker service task[taskId: " +task.id()+ ", container:"+task.status().containerStatus().containerId()+"] "
-										+ "on network: " + network.name() +"["+ network.id() + ":" + networkAttachment.addresses().iterator().next() +"]");
+								logger.info("Found qualifying docker service task[taskId: " +task.id() + ", container: "+task.status().containerStatus().containerId()+ ", state: " + task.status().state()+ "] "
+										+ "on network: " + network.name() +"["+ network.id() + ":" + networkAttachment.addresses().iterator().next() +"]");																
 							
-								// add it!
-								discoveredContainers.add(
-										new DiscoveredContainer(network, service, task, networkAttachment));
+								// if container is in status 'running', then add it!									
+								if (TaskStatus.TASK_STATE_RUNNING.equals(task.status().state())) {
+									discoveredContainers.add(new DiscoveredContainer(network, service, task, networkAttachment));
+								}
 							}
 
 						}
