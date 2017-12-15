@@ -35,10 +35,8 @@ dependencies {
     // https://mvnrepository.com/artifact/com.spotify/docker-client
     compile group: 'com.spotify', name: 'docker-client', version: '8.+', classifier: 'shaded'
     
-    compile 'org.slf4j:slf4j-api:1.7.19'
-    
-    testCompile  group: 'org.slf4j', name: 'slf4j-log4j12', version: '1.7.25'
-    testCompile  group: 'log4j', name: 'log4j', version: '1.2.17'
+    compile 'org.slf4j:slf4j-api:1.7.25'
+    compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
     
 }
 
