@@ -33,8 +33,8 @@ public class DockerTestRunner {
 				sb.append(dc.getIp()+"\n");
 			}
 			
-			logger.info("MyAddress: " + ssd.getMyIpAddress().getHostAddress() + " total nodes ["+ssd.discoverContainers().size()+"]");
-			logger.info(sb.toString());
+			System.out.println("MyAddress: " + ssd.getMyIpAddress().getHostAddress() + " total nodes ["+ssd.discoverContainers().size()+"]");
+			System.out.println(sb.toString());
 			
 			Thread.currentThread().sleep(3000);
 		}
