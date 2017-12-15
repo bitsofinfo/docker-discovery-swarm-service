@@ -33,7 +33,7 @@ targetCompatibility = 1.7
 dependencies {
     
     // https://mvnrepository.com/artifact/com.spotify/docker-client
-    compile group: 'com.spotify', name: 'docker-client', version: '8.7.3', classifier: 'shaded'
+    compile group: 'com.spotify', name: 'docker-client', version: '8.+', classifier: 'shaded'
     
     compile 'org.slf4j:slf4j-api:1.7.19'
     
