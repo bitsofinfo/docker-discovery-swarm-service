@@ -303,7 +303,7 @@ public class SwarmServiceDiscovery {
 								
 								// if container is in status 'running', then add it!									
 								if (TaskStatus.TASK_STATE_RUNNING.equals(task.status().state())) {
-									
+									 
 									logger.info("Found qualifying docker service task[taskId: " +task.id() + ", container: "+task.status().containerStatus().containerId()+ ", state: " + task.status().state()+ "] "
 											+ "on network: " + network.name() +"["+ network.id() + ":" + networkAttachment.addresses().iterator().next() +"]");																
 									
