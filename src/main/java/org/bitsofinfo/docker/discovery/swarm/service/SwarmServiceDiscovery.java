@@ -17,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DefaultDockerClient.Builder;
 import com.spotify.docker.client.DockerCertificatesStore;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListNetworksParam;
@@ -97,6 +98,13 @@ public class SwarmServiceDiscovery {
 		this.rawDockerServiceNames = rawDockerServiceNames;
 		
 		this.swarmMgrUri = swarmMgrUri;
+		
+		if (this.swarmMgrUri == null) {
+			if (System.getenv("DOCKER_HOST") != null && System.getenv("DOCKER_HOST").trim().isEmpty()) {
+				this.swarmMgrUri = new URI(System.getenv("DOCKER_HOST"));
+			}
+		}
+		
 		this.skipVerifySsl = skipVerifySSL;
 
 		if (rawDockerNetworkNames != null && !rawDockerNetworkNames.trim().isEmpty()) {
@@ -241,19 +249,23 @@ public class SwarmServiceDiscovery {
 			// our client
 			DockerClient docker = null;
 			
+			Builder dockerBuilder = DefaultDockerClient.fromEnv();
+			
 			if (skipVerifySsl) {
-				docker = DefaultDockerClient.fromEnv()
-							.dockerCertificates(new SkipVerifyDockerCertificatesStore())
-							.uri(this.swarmMgrUri).build();
-			} else {
-				docker = DefaultDockerClient.fromEnv().build();
+				dockerBuilder.dockerCertificates(new SkipVerifyDockerCertificatesStore());
 			}
+			
+			if (this.swarmMgrUri != null) {
+				dockerBuilder.uri(this.swarmMgrUri);
+			}
+					
+			docker = dockerBuilder.build();
 			
 			StringBuffer sb = new StringBuffer("discoverNodes(): via DOCKER_HOST: " + docker.getHost() + "\n");
 			sb.append("dockerNetworkNames = " + this.getRawDockerNetworkNames() + "\n");
 			sb.append("dockerServiceNames = " + this.getRawDockerServiceNames() + "\n");
 			sb.append("dockerServiceLabels = " + this.getRawDockerServiceLabels() + "\n");
-			sb.append("swarmMgrUri = " + this.swarmMgrUri.toString() + "\n");
+			sb.append("swarmMgrUri = " + this.swarmMgrUri + "\n");
 			sb.append("skipVerifySsl = " + this.skipVerifySsl + "\n");
 			logger.info(sb.toString());
 
