@@ -253,6 +253,8 @@ public class SwarmServiceDiscovery {
 			sb.append("dockerNetworkNames = " + this.getRawDockerNetworkNames() + "\n");
 			sb.append("dockerServiceNames = " + this.getRawDockerServiceNames() + "\n");
 			sb.append("dockerServiceLabels = " + this.getRawDockerServiceLabels() + "\n");
+			sb.append("swarmMgrUri = " + this.swarmMgrUri.toString() + "\n");
+			sb.append("skipVerifySsl = " + this.skipVerifySsl + "\n");
 			logger.info(sb.toString());
 
 			// our discovered containers
