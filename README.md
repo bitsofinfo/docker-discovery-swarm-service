@@ -29,6 +29,8 @@ Beta code.
 
 * MASTER - in progress, this README refers to what is in the master branch. Switch to relevant RELEASE tag above to see that versions README
 
+* [1.0-RC4](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC4) - support for skip verify TLS to Swarm Managers
+
 * [1.0-RC3](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC3) - upgrade spotify docker-client
 
 * [1.0-RC2](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC2) - excludes stopped tasks
@@ -38,7 +40,7 @@ Beta code.
 ## <a id="requirements"></a>Requirements
 
 * Java 7+
-* [Docker 1.12+ Swarm Mode](https://docs.docker.com/engine/swarm/) with one or more swarm manager nodes listening on a `tcp://` socket
+* [Docker 1.12+ Swarm Mode](https://docs.docker.com/engine/swarm/) with one or more swarm manager nodes listening on a `tcp://`, `http://` or `https://` socket
 * Your application is running in a Docker container and deployed as a swarm service, using this library for discovery
 
 ## <a id="mavengradle"></a>Maven/Gradle
@@ -53,7 +55,7 @@ repositories {
 }
 
 dependencies {
-    compile 'org.bitsofinfo:docker-discovery-swarm-service:1.0-RC2'
+    compile 'org.bitsofinfo:docker-discovery-swarm-service:1.0-RC4'
 }
 ```
 
@@ -64,7 +66,7 @@ dependencies {
     <dependency>
         <groupId>org.bitsofinfo</groupId>
         <artifactId>docker-discovery-swarm-service</artifactId>
-        <version>1.0-RC2</version>
+        <version>1.0-RC4</version>
     </dependency>
 </dependencies>
 
@@ -89,7 +91,7 @@ dependencies {
 
 Its **highly recommended** that you walking the example below in the section below. Overall the concept and API is quite simple.
 
-1. You launch your container that utilizes this library as a Docker Swarm Service on a Docker Overlay Network, specifying a `DOCKER_HOST`  (via `-e` args) that points to a Swarm Manager listening on `tcp://` and your container the required arguments (or via other configuration means) about the relevant `dockerNetworkNames`, `dockerServiceNames`, and any `dockerServiceLabels` it will use to locate itself and peer containers in the swarm service via the `/networks`, `/services` and `/tasks` APIs provided by the configured `DOCKER_HOST` (which should point to one or more swarm managers, i.e. via dns etc. `http://swarmmgrs:2375`)
+1. You launch your container that utilizes this library as a Docker Swarm Service on a Docker Overlay Network, specifying a `DOCKER_HOST`  (via `-e` args) that points to a Swarm Manager listening on `tcp://`, `http://` or `https://` and your container the required arguments (or via other configuration means) about the relevant `dockerNetworkNames`, `dockerServiceNames`, and any `dockerServiceLabels` it will use to locate itself and peer containers in the swarm service via the `/networks`, `/services` and `/tasks` APIs provided by the configured `DOCKER_HOST` (which should point to one or more swarm managers, i.e. via dns etc. `http(s)://swarmmgrs:237[5|6]`)
 
 2. In your app's code, you create a new [SwarmServiceDiscovery](src/main/java/org/bitsofinfo/docker/discovery/swarm/service/SwarmServiceDiscovery.java) instance, giving it the required constructor args or properties via the builder syntax for the docker network, service names and labels to utilize.
 
@@ -110,7 +112,31 @@ Its **highly recommended** that you walking the example below in the section bel
   
 **/
 
+// Reliant on value within DOCKER_HOST env var
 SwarmServiceDiscovery ssd = new SwarmServiceDiscovery()
+                            .addDockerNetworkName("my-service-net")
+                            .addDockerServiceName("my-service-01")
+                            
+                            // optional label filter
+                            .addDockerServiceLabel("production");
+                        
+// get my ip on the docker overlay network
+InetAddress myIp = ssd.getMyIpAddress();
+                        
+// gets all nodes inclusive of this node
+for (DiscoveredContainer dc : ssd.discoverContainers()) {
+    System.out.println(dc.getIp());
+}
+
+```
+
+**Sample for connecting to SSL enabled Swarm MGR Docker host**
+
+```
+SwarmServiceDiscovery ssd = new SwarmServiceDiscovery()
+                            .swarmMgrUri(new URI("http[s]://myswarmmgr:237[5|6]"))
+                            .skipVerifySsl([true | false])
+                            
                             .addDockerNetworkName("my-service-net")
                             .addDockerServiceName("my-service-01")
                             

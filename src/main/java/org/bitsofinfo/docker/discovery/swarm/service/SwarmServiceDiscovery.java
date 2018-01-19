@@ -2,6 +2,8 @@ package org.bitsofinfo.docker.discovery.swarm.service;
 
 import java.net.InetAddress;
 import java.net.NetworkInterface;
+import java.net.URI;
+import java.net.URL;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -15,6 +17,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.spotify.docker.client.DefaultDockerClient;
+import com.spotify.docker.client.DockerCertificatesStore;
 import com.spotify.docker.client.DockerClient;
 import com.spotify.docker.client.DockerClient.ListNetworksParam;
 import com.spotify.docker.client.messages.Network;
@@ -50,7 +53,10 @@ public class SwarmServiceDiscovery {
 
 	private DiscoveredContainer myContainer = null;
 	private InetAddress myAddress = null;
-
+	
+	private URI swarmMgrUri = null;
+	private boolean skipVerifySsl = false;
+	
 	/**
 	 * Constructor
 	 * 
@@ -62,10 +68,36 @@ public class SwarmServiceDiscovery {
 	public SwarmServiceDiscovery(String rawDockerNetworkNames, 
 						         String rawDockerServiceLabels,
 							     String rawDockerServiceNames) throws Exception {
+		
+		this(rawDockerNetworkNames,
+			 rawDockerServiceLabels,
+			 rawDockerServiceNames,
+			 new URI(System.getenv("DOCKER_HOST")),
+			 false);
+	}
+
+	/**
+	 * Constructor
+	 * 
+	 * @param rawDockerNetworkNames comma delimited list of names
+	 * @param rawDockerServiceLabels comma delimited list of names
+	 * @param rawDockerServiceNames (optional) comma delimited list of names
+	 * @param swarmMgrUri http(s)://hostname:port or tcp://hostname:port
+	 * @param skipVerifySSL if the swarmMgrUrl is https:// and provides a mis-matched name/ or self signed cert, will not work w/ tcp:// or http:// based uris
+	 * @throws Exception
+	 */
+	public SwarmServiceDiscovery(String rawDockerNetworkNames, 
+						         String rawDockerServiceLabels,
+							     String rawDockerServiceNames,
+							     URI swarmMgrUri,
+							     boolean skipVerifySSL) throws Exception {
 
 		this.rawDockerNetworkNames = rawDockerNetworkNames;
 		this.rawDockerServiceLabels = rawDockerServiceLabels;
 		this.rawDockerServiceNames = rawDockerServiceNames;
+		
+		this.swarmMgrUri = swarmMgrUri;
+		this.skipVerifySsl = skipVerifySSL;
 
 		if (rawDockerNetworkNames != null && !rawDockerNetworkNames.trim().isEmpty()) {
 			for (String rawElement : rawDockerNetworkNames.split(",")) {
@@ -205,9 +237,17 @@ public class SwarmServiceDiscovery {
 	public Set<DiscoveredContainer> discoverContainers() throws Exception {
 		
 		try {
-
+			
 			// our client
-			final DockerClient docker = DefaultDockerClient.fromEnv().build();
+			DockerClient docker = null;
+			
+			if (skipVerifySsl) {
+				docker = DefaultDockerClient.fromEnv()
+							.dockerCertificates(new SkipVerifyDockerCertificatesStore())
+							.uri(this.swarmMgrUri).build();
+			} else {
+				docker = DefaultDockerClient.fromEnv().build();
+			}
 			
 			StringBuffer sb = new StringBuffer("discoverNodes(): via DOCKER_HOST: " + docker.getHost() + "\n");
 			sb.append("dockerNetworkNames = " + this.getRawDockerNetworkNames() + "\n");
@@ -364,6 +404,16 @@ public class SwarmServiceDiscovery {
 			this.dockerServiceLabels = new HashMap<String,String>();
 		}
 		this.dockerServiceLabels.put(label,value);
+		return this;
+	}
+	
+	public SwarmServiceDiscovery skipVerifySsl(boolean skipVerifySsl) {
+		this.skipVerifySsl = skipVerifySsl;
+		return this;
+	}
+	
+	public SwarmServiceDiscovery swarmMgrUri(URI swarmMgrUri) {
+		this.swarmMgrUri = swarmMgrUri;
 		return this;
 	}
 }
