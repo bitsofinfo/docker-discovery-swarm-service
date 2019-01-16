@@ -26,6 +26,7 @@ import com.spotify.docker.client.messages.swarm.EndpointVirtualIp;
 import com.spotify.docker.client.messages.swarm.NetworkAttachment;
 import com.spotify.docker.client.messages.swarm.Service;
 import com.spotify.docker.client.messages.swarm.Service.Criteria;
+import com.spotify.docker.client.shaded.com.google.common.collect.ImmutableList;
 import com.spotify.docker.client.messages.swarm.Task;
 import com.spotify.docker.client.messages.swarm.TaskStatus;
 
@@ -346,9 +347,25 @@ public class SwarmServiceDiscovery {
 					// if so, then lets find all its tasks (actual container instances of the service)
 					List<Task> tasks = docker.listTasks(Task.Criteria.builder().serviceName(service.spec().name()).build());
 
+					if (tasks == null) {
+						logger.warn("docker.listTasks() returned NULL for service:" + service.spec().name() + ", skipping this service");
+						continue;
+					}
+					
 					// for every task, lets get its network attachments
 					for (Task task : tasks) {
-						for (NetworkAttachment networkAttachment : task.networkAttachments()) {
+						
+						ImmutableList<NetworkAttachment> networkAttachments = task.networkAttachments();
+						if (networkAttachments == null) {
+							logger.warn("task.networkAttachments() returned NULL for task "
+									+ "id:" + task.id() + 
+									" name:" + task.name() + 
+									" nodeid:" + task.nodeId() + 
+									" I am skipping this task for service: " + service.spec().name());
+							continue;
+						}
+						
+						for (NetworkAttachment networkAttachment : networkAttachments) {
 
 							// if the network ID the task is = the current network we care about for 
 							// the service.. then lets treat it as a "dicovered container"
