@@ -29,6 +29,8 @@ Beta code.
 
 * MASTER - in progress, this README refers to what is in the master branch. Switch to relevant RELEASE tag above to see that versions README
 
+* [1.0-RC5] Better NPE handling for invalid/null Tasks returned from service spec or no network attachments
+
 * [1.0-RC4](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC4) - support for skip verify TLS to Swarm Managers
 
 * [1.0-RC3](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC3) - upgrade spotify docker-client
