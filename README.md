@@ -57,7 +57,7 @@ To use this discovery strategy in your Maven or Gradle project use the dependenc
 
 ```
 repositories {
-    maventCentral()
+    mavenCentral()
 }
 
 dependencies {
