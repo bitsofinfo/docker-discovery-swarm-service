@@ -74,4 +74,4 @@ script:
   - docker service rm docker-discovery-swarm-service-test
 
 jdk:
-  - oraclejdk8
+  - openjdk8
