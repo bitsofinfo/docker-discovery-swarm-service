@@ -25,9 +25,13 @@ The purpose of this library is for "self-discovery" from within your JVM based D
 
 Beta code. 
 
+**IMPORTANT: TAG: 1.0-RC5-20210205**: All tags prior to this might not end up in maven central. However this tag is a re-publish of 1.0-RC5 to be made available in Maven Central due to the sunset of Bintray/JCenter in 2021. 
+
 ## <a id="releases"></a>Releases
 
 * MASTER - in progress, this README refers to what is in the master branch. Switch to relevant RELEASE tag above to see that versions README
+
+* [1.0-RC5-20210205](https://github.com/bitsofinfo/docker-discovery-registrator-consul/releases/tag/1.0-RC5-20210205) - same as 1.0-RC5 but made compliant for Maven Central due to JCenter/Bintray closure. Spotify docker-client set explicitly to 8.15.0
 
 * [1.0-RC5](https://github.com/bitsofinfo/docker-discovery-swarm-service/releases/tag/1.0-RC) - Better NPE handling for invalid/null Tasks returned from service spec or no network attachments
 
@@ -53,11 +57,11 @@ To use this discovery strategy in your Maven or Gradle project use the dependenc
 
 ```
 repositories {
-    jcenter()
+    maventCentral()
 }
 
 dependencies {
-    compile 'org.bitsofinfo:docker-discovery-swarm-service:1.0-RC4'
+    compile 'org.bitsofinfo:docker-discovery-swarm-service:1.0-RC5-20210205'
 }
 ```
 
@@ -68,20 +72,9 @@ dependencies {
     <dependency>
         <groupId>org.bitsofinfo</groupId>
         <artifactId>docker-discovery-swarm-service</artifactId>
-        <version>1.0-RC4</version>
+        <version>1.0-RC5-20210205</version>
     </dependency>
 </dependencies>
-
-<repositories>
-    <repository>
-        <snapshots>
-            <enabled>false</enabled>
-        </snapshots>
-        <id>central</id>
-        <name>bintray</name>
-        <url>http://jcenter.bintray.com</url>
-    </repository>
-</repositories>
 ```
 
 ## <a id="features"></a>Features

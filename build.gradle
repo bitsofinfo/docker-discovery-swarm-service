@@ -1,6 +1,6 @@
 buildscript {
 	repositories {
-    	jcenter()
+    	mavenCentral()
     }
     
     dependencies {
@@ -33,7 +33,7 @@ targetCompatibility = 1.7
 dependencies {
     
     // https://mvnrepository.com/artifact/com.spotify/docker-client
-    compile group: 'com.spotify', name: 'docker-client', version: '8.+', classifier: 'shaded'
+    compile group: 'com.spotify', name: 'docker-client', version: '8.15.0', classifier: 'shaded'
     
     compile 'org.slf4j:slf4j-api:1.7.25'
     compile group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.25'
@@ -59,15 +59,39 @@ bintray {
     }
 }
 
+
 publishing {
     publications {
         dockerDiscoverySwarmService(MavenPublication) {
             from components.java
+
             groupId project.property('group')
             artifactId 'docker-discovery-swarm-service'
             version project.property('version')
 
             artifact sourcesJar
+            artifact javadocJar
+
+            pom.withXml {
+                asNode().appendNode('name', project.property('group')+":docker-discovery-swarm-service")
+                asNode().appendNode('description', project.property('description'))
+                asNode().appendNode('url', "https://github.com/bitsofinfo/docker-discovery-swarm-service")
+                asNode().appendNode('packaging', "jar")
+                asNode().appendNode('licenses').appendNode('license')
+                    .appendNode('name', "The Apache License, Version 2.0").parent()
+                    .appendNode('url', "http://www.apache.org/licenses/LICENSE-2.0.txt")
+                asNode().appendNode('developers').appendNode('developer')
+                    .appendNode('id', "bitsofinfo").parent()
+                    .appendNode('name', "bitsofinfo").parent()
+                    .appendNode('email', "bitsofinfo.g@gmail.com").parent()
+                    .appendNode('organization',"bitsofinfo").parent()
+                    .appendNode('organizationUrl','https://github.com/bitsofinfo')
+                asNode().appendNode('scm')
+                    .appendNode('connection', "scm:git:https://github.com/bitsofinfo/docker-discovery-swarm-service.git").parent()
+                    .appendNode('developerConnection', "scm:git:https://github.com/bitsofinfo/docker-discovery-swarm-service.git").parent()
+                    .appendNode('url', "https://github.com/bitsofinfo/docker-discovery-swarm-service")   
+            }
+
         }
     }
 }
@@ -75,6 +99,17 @@ publishing {
 task sourcesJar(type: Jar, dependsOn: classes) {
     classifier = 'sources'
     from sourceSets.main.allSource
+}
+
+
+task javadocJar(type: Jar, dependsOn: 'javadoc') {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
 }
 
 task runTests(type: Test) {
@@ -110,8 +145,5 @@ unitTest {
     }
 }
 
-artifacts {
-    archives sourcesJar
-}
 
 
